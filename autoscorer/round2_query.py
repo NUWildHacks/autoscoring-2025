@@ -36,10 +36,10 @@ class Round2Query:
 
         result = quack.sql("""
 SELECT
-    round1_df.project_id, team_name, final_round_points, sum_1hl, sum_mean, random() AS random
+    round1_df.project_id, team_name, final_round_points, project_shift_weighted, sum_1hl, total, random() AS random
 FROM
     scores_df INNER JOIN round1_df ON scores_df.project_id = round1_df.project_id
-ORDER BY final_round_points DESC, sum_1hl DESC, sum_mean DESC, random DESC;
+ORDER BY final_round_points DESC, project_shift_weighted DESC, sum_1hl DESC, total DESC, random DESC;
         """)
 
         print(result)

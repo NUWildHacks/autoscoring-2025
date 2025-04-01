@@ -4,7 +4,7 @@ from autoscorer.round2_query import Round2Query
 
 
 def fix_cols(df, colname):
-    df[colname] = df[colname].fillna(0).astype(int)
+    df[colname] = df[colname].fillna(0).astype(float)
     return df
 
 
@@ -17,7 +17,7 @@ def round1(path: str, p=True):
         "originality",
         "design",
         "presentation",
-        "comments"
+        "comments",
     ])
 
     round1_df = reader.get_df()
@@ -52,5 +52,5 @@ def round2(path: str, r1, p=True):
 
 
 if __name__ == "__main__":
-    round1 = round1("sample_round1_data.csv", True)
-    round2 = round2("sample_round2_data.csv", round1, True)
+    round1 = round1("simulated_scores_2.csv", True)
+    # round2 = round2("sample_round2_data.csv", round1, True)
