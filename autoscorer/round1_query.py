@@ -56,18 +56,20 @@ SELECT
     0.5*(3*data.technical_complexity + 3*data.usefulness + 2*data.originality + 1.5*data.design + 0.5*data.presentation) AS sum,
     score_by_judge.weight AS weight,
     score_by_judge.delta AS delta,
-    (sum - ?) * (score_by_judge.count/(score_by_judge.count + ?)) AS project_shift
+    (sum - ?) AS project_shift
 FROM data INNER JOIN score_by_judge ON data.judge_name = score_by_judge.judge_name
 ORDER BY project_id;
-        """, params=[global_average, self.lambda_project])
+        """, params=[global_average])
 
         result2 = quack.sql("""
 SELECT
     project_id,
+    (COUNT(*)/(COUNT(*) + ?)) AS eval_count,
     ROUND(MEDIAN(sum), 3) AS sum_1hl,
     ROUND(SUM(sum), 3) AS total,
+    ROUND(MEAN(sum), 3) AS sum_avg,
     ROUND(total - SUM(weight * delta), 3) AS total_judge_shifted_weighted,
-    ROUND(total_judge_shifted_weighted + SUM(project_shift), 3) AS project_shift_weighted,
+    ROUND(total_judge_shifted_weighted + (SUM(project_shift) * eval_count), 3) AS project_shift_weighted,
     --begin unused
         --ROUND(total - SUM(delta), 3) AS total_judge_shifted_unweighted,
         --ROUND(total_judge_shifted_unweighted + SUM(project_shift), 3) AS project_shift_unweighted,
@@ -75,8 +77,8 @@ SELECT
     random() AS random
 FROM result1
 GROUP BY project_id
-ORDER BY project_shift_weighted, sum_1hl, total, random;
-        """)
+ORDER BY project_shift_weighted, sum_1hl, sum_avg, random;
+        """, params=[self.lambda_project])
 
         result3 = quack.sql("""
 WITH cte AS (
@@ -90,10 +92,10 @@ SELECT
     project_id,
     team_name,
     project_shift_weighted, --total_judge_shifted_weighted, total_judge_shifted_unweighted, project_shift_unweighted,
-    sum_1hl, total, random
+    sum_1hl, sum_avg, random
 FROM cte
 WHERE rn = 1
-ORDER BY project_shift_weighted DESC, sum_1hl DESC, total DESC, random DESC;
+ORDER BY project_shift_weighted DESC, sum_1hl DESC, sum_avg DESC, random DESC;
         """)
         
         return result3

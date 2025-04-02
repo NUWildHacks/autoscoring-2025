@@ -27,9 +27,9 @@ class Round2Query:
 
         for team in self.df["team_3rd"]:
             if team in scores:
-                scores[team] += 3
+                scores[team] += 1
                 continue
-            scores[team] = 3
+            scores[team] = 1
         
         scores_df = pd.DataFrame(sorted(scores.items()), columns=['project_id', 'final_round_points'])
         round1_df = self.round1_df
